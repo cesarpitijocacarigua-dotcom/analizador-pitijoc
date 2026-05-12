@@ -32,22 +32,29 @@ if login():
     st.sidebar.title(f"👤 {st.session_state['usuario']}")
     tasa = st.sidebar.number_input("Tasa USD/BS", value=690.0, format="%.2f")
 
-    # Nombre exacto de tu archivo en la carpeta
     file_path = "BDPITIJOCPRO.xlsx"
     df = None
     
     if os.path.exists(file_path):
+        # Cargamos el Excel y limpiamos nombres de columnas inmediatamente
         df = pd.read_excel(file_path)
+        df.columns = df.columns.str.strip().str.upper() # Quita espacios y pone todo en MAYÚSCULAS
 
     if df is not None:
-        # CORRECCIÓN DE NOMBRES DE COLUMNAS
-        # Aquí usamos 'COSTOS' con S porque así está en tu Excel
-        try:
-            df['PRECIO VENTA (BS)'] = df['COSTOS'] * tasa * df['CATEGORIA']
-        except KeyError:
-            st.error("Error: Verifica que las columnas 'COSTOS' y 'CATEGORIA' existan en el Excel.")
-
         st.title("📦 Control de Inventario Pitijoc")
+        
+        # Intentamos el cálculo con nombres limpios
+        try:
+            # Forzamos conversión a número por si acaso hay celdas vacías
+            df['COSTOS'] = pd.to_numeric(df['COSTOS'], errors='coerce').fillna(0)
+            df['CATEGORIA'] = pd.to_numeric(df['CATEGORIA'], errors='coerce').fillna(1)
+            
+            # CÁLCULO DEL PRECIO DE VENTA
+            df['PRECIO VENTA (BS)'] = df['COSTOS'] * tasa * df['CATEGORIA']
+            calculo_exitoso = True
+        except Exception as e:
+            st.error(f"Error en el cálculo: {e}")
+            calculo_exitoso = False
 
         if rol == "admin":
             m1, m2, m3 = st.columns(3)
@@ -58,7 +65,7 @@ if login():
             st.divider()
         
         # Buscador
-        busq = st.text_input("🔍 Buscar por Código, Descripción o Ubicación...")
+        busq = st.text_input("🔍 Buscar por Código, Descripción, Ubicación o Categoría...")
         
         if busq:
             mask = df.apply(lambda r: busq.lower() in str(r).lower(), axis=1)
@@ -68,15 +75,17 @@ if login():
 
         # Seguridad de Roles
         if rol == "ventas":
-            # Columnas visibles para vendedores
-            cols_mostrar = ['CODIGO', 'DESCRIPCION', 'STOCK', 'UBICACIÓN', 'PRECIO VENTA (BS)']
+            # Columnas para vendedores (ocultamos costos)
+            columnas_finales = ['CODIGO', 'DESCRIPCION', 'STOCK', 'UBICACIÓN', 'PRECIO VENTA (BS)']
         else:
             # Admin ve todo
-            cols_mostrar = df_display.columns.tolist()
+            columnas_finales = df_display.columns.tolist()
 
-        st.dataframe(df_display[cols_mostrar], use_container_width=True, hide_index=True)
+        # Mostrar tabla solo las columnas que existan para evitar errores visuales
+        cols_a_mostrar = [c for c in columnas_finales if c in df_display.columns]
+        st.dataframe(df_display[cols_a_mostrar], use_container_width=True, hide_index=True)
     else:
-        st.error(f"No encuentro el archivo {file_path}. Asegúrate de que esté en la carpeta ANALIZADOR_PRO.")
+        st.error(f"No se encontró el archivo {file_path} en la carpeta raíz.")
 
     if st.sidebar.button("Cerrar Sesión"):
         del st.session_state["autenticado"]
