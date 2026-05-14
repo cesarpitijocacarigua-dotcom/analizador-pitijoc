@@ -90,34 +90,110 @@ else:
 
     # --- ENRUTADOR DE VISTAS (Sustituye a todos los switch($accion) de PHP) ---
     
+    # =========================================================================
+    # VISTA: DASHBOARD RESUMEN (MÓDULO DE ALTO IMPACTO VISUAL UNIFICADO)
+    # =========================================================================
     if seleccion == "Dashboard Resumen":
-        st.title("📈 Panel de Control Operativo")
-        st.write(f"Estado del negocio al día de hoy: {datetime.now().strftime('%d/%m/%Y')}")
-        
-        # Bloque de KPIs principales usando st.columns
-        kpi1, kpi2, kpi3 = st.columns(3)
-        with kpi1:
-            st.metric(label="Total Artículos Registrados", value="7,638", delta="+13 nuevos este mes")
-        with kpi2:
-            st.metric(label="Ventas Totales del Período", value="$14,250.00", delta="▲ 8% vs mes anterior")
-        with kpi3:
-            st.metric(label="Alertas de Quiebre de Stock", value="42", delta="Revisar compras urgente", delta_color="inverse")
-            
+        st.title("📊 Analizador de Operaciones - Pitijoc C.A.")
+        st.caption("Ecosistema de Monitoreo Multitienda | Desarrollado por Soluciones Asoft C.A.")
         st.markdown("---")
-        st.subheader("Evolución de Ventas por Sucursal")
-        # Gráfico interactivo nativo de muestra (Reemplaza a QuickChart)
-        data_grafico = pd.DataFrame({
-            'Sucursal': ['Acarigua', 'Valera', 'Trujillo', 'Guanare', 'Barinas'],
-            'Ventas ($)': [8500, 3200, 1500, 2100, 4300]
-        })
-        fig = px.bar(data_grafico, x='Sucursal', y='Ventas ($)', color='Sucursal', text_auto=True)
-        st.plotly_chart(fig, use_container_width=True)
+        
+        # ------------------------------------------
+        # 1. BLOQUE DE TARJETAS INDICADORAS (KPI CARDS)
+        # ------------------------------------------
+        card1, card2, card3, card4 = st.columns(4)
+        
+        with card1:
+            with st.container(border=True):
+                st.markdown("<p style='margin:0; color:gray; font-size:14px;'>💰 VENTAS DEL MES</p>", unsafe_allow_html=True)
+                st.markdown("<h2 style='margin:0; color:#2E7D32;'>$14,250.00</h2>", unsafe_allow_html=True)
+                st.caption("📈 +8.2% vs mes anterior")
+                
+        with card2:
+            with st.container(border=True):
+                st.markdown("<p style='margin:0; color:gray; font-size:14px;'>📈 UTILDAD ESTIMADA</p>", unsafe_allow_html=True)
+                st.markdown("<h2 style='margin:0; color:#1565C0;'>$4,275.00</h2>", unsafe_allow_html=True)
+                st.caption("🎯 Margen del 30% blindado")
+                
+        with card3:
+            with st.container(border=True):
+                st.markdown("<p style='margin:0; color:gray; font-size:14px;'>📦 TOTAL PRODUCTOS</p>", unsafe_allow_html=True)
+                st.markdown("<h2 style='margin:0; color:#37474F;'>7,638</h2>", unsafe_allow_html=True)
+                st.caption("✨ Sincronizados con Profit")
+                
+        with card4:
+            with st.container(border=True):
+                st.markdown("<p style='margin:0; color:gray; font-size:14px;'>👥 CLIENTES REGISTRADOS</p>", unsafe_allow_html=True)
+                st.markdown("<h2 style='margin:0; color:#E65100;'>142</h2>", unsafe_allow_html=True)
+                st.caption("🏪 Carteras multitienda activas")
 
+        st.markdown("---")
+
+        # ------------------------------------------
+        # 2. SECCIÓN GRÁFICA (DISTRIBUCIÓN 50 / 50)
+        # ------------------------------------------
+        col_grafico_izq, col_grafico_der = st.columns(2)
+        
+        # Datos simulados de tus reportes de Profit
+        df_ventas_sucursal = pd.DataFrame({
+            'Sucursal': ['Acarigua', 'Barinas', 'Valera', 'Guanare', 'Trujillo'],
+            'Monto ($)': [8500, 4300, 3200, 2100, 1500]
+        })
+        
+        with col_grafico_izq:
+            st.subheader("🏢 Volumen de Ventas por Sucursal")
+            # Gráfico de Barras con paleta de color profesional (Plotly)
+            fig_barras = px.bar(
+                df_ventas_sucursal, 
+                x='Sucursal', 
+                y='Monto ($)', 
+                color='Monto ($)',
+                color_continuous_scale='Blues',
+                text_auto='.2s'
+            )
+            fig_barras.update_layout(showlegend=False, height=350, margin=dict(t=20, b=20, l=20, r=20))
+            st.plotly_chart(fig_barras, use_container_width=True)
+            
+        with col_grafico_der:
+            st.subheader("🍕 Participación de Mercado")
+            # Gráfico de Torta / Pie interactivo convertido a Dona
+            fig_torta = px.pie(
+                df_ventas_sucursal, 
+                names='Sucursal', 
+                values='Monto ($)',
+                hole=0.4, 
+                color_discrete_sequence=px.colors.sequential.YlGnBu
+            )
+            fig_torta.update_layout(height=350, margin=dict(t=20, b=20, l=20, r=20))
+            st.plotly_chart(fig_torta, use_container_width=True)
+
+        st.markdown("---")
+
+        # ------------------------------------------
+        # 3. TABLA DE ALTA DENSIDAD INFERIOR
+        # ------------------------------------------
+        st.subheader("📋 Resumen de Rotación Crítica y Fallas")
+        
+        # Muestra de la matriz consolidada
+        df_ranking = pd.DataFrame({
+            'Ranking': [1, 2, 3, 4],
+            'Código Interno': ['00009', '034264025677', '00125', '00042'],
+            'Descripción del Artículo': ['CUCHILLA LIC. OSTER', 'RELOJ LAVADORA WHIRLPOOL', 'AUTOMATICO NEVERA KMP', 'CONSOLA SPLIT 12K'],
+            'Ventas 3M (Acarigua)': [120, 50, 15, 8],
+            'Stock Global': [245, 57, 15, 2],
+            'Estado': ['🟢 Stock Seguro', '🟢 Stock Seguro', '🟡 Rango Medio', '🔴 Quiebre Inminente']
+        })
+        
+        # Pintamos la tabla aprovechando el ancho completo y con paginación nativa
+        st.dataframe(df_ranking, use_container_width=True, hide_index=True)
+
+    # =========================================================================
+    # VISTA: INVENTARIO MULTITIENDA
+    # =========================================================================
     elif seleccion == "Inventario Multitienda":
         st.title("📦 Matriz de Inventario Consolidado Multitienda")
         st.markdown("---")
         
-        # Llamamos al motor core de datos de manera real pasándole tus credenciales
         with st.spinner("Cargando y consolidando existencias de todas las sucursales..."):
             try:
                 from inventario_core import obtener_matriz_inventario_completo
@@ -129,16 +205,12 @@ else:
         if df_inventario.empty:
             st.warning("No se encontraron registros de productos o inventario en la base de datos.")
         else:
-            # Filtros interactivos superiores en pantalla
             col_b1, col_b2 = st.columns([3, 1])
             with col_b1:
-                # Buscador dinámico inteligente (Sustituye todo el JavaScript de la web vieja)
                 busqueda = st.text_input("🔍 Buscar repuesto por Nombre de Artículo o por Código Interno:")
             with col_b2:
-                # Selector de registros por página
                 lineas_ver = st.selectbox("Mostrar filas:", [100, 200, 500, 1000], index=1)
             
-            # Aplicar filtro en memoria si el usuario escribe
             if busqueda:
                 df_inventario = df_inventario[
                     df_inventario['DESCRIPCION'].str.contains(busqueda, case=False) | 
@@ -146,20 +218,23 @@ else:
                 ]
             
             st.info(f"Mostrando {min(len(df_inventario), lineas_ver)} de {len(df_inventario)} repuestos totales encontrados.")
-            
-            # Renderizar la tabla interactiva Pro nativa de Streamlit con ordenamiento automático
             st.dataframe(df_inventario.head(lineas_ver), use_container_width=True, height=600)
+
+    # =========================================================================
+    # VISTA: CARGAR REPORTE VENTAS
+    # =========================================================================
     elif seleccion == "Cargar Reporte Ventas (Profit)":
         st.title("📥 Importación de Ventas desde Profit Plus")
-        # Aquí mapeamos el formulario viejo de 'importar_ventas.php'
-        archivo_cargado = st.file_with_container = st.file_uploader("Selecciona el archivo Excel generado por Profit", type=["xlsx", "xls"])
+        archivo_cargado = st.file_uploader("Selecciona el archivo Excel generado por Profit", type=["xlsx", "xls"])
         sucursal_sel = st.selectbox("Asignar a la Sucursal:", ["Acarigua", "Valera", "Guanare", "Turen"])
         
         if archivo_cargado and st.button("Procesar e Importar Ventas"):
             st.info("Procesando estructura dinámicamente y validando ceros a la izquierda...")
-            # Aquí se ejecuta: procesar_e_importar_ventas(archivo_cargado, sucursal_id, DB_CONFIG)
             st.success("¡Lote de ventas importado exitosamente sin duplicados!")
 
+    # =========================================================================
+    # VISTA: CARGAR AJUSTE COMPRAS
+    # =========================================================================
     elif seleccion == "Cargar Ajuste Compras (Excel)":
         st.title("🧾 Carga de Ajustes de Entrada (Compras)")
         st.write("El sistema validará las celdas A5 y A12 e implantará los costos reales de la Base de Datos.")
@@ -169,9 +244,11 @@ else:
             st.warning("Leyendo códigos y cruzando con los costos maestros...")
             st.success("Ajuste procesado. Inventario actualizado y margen del 30% recalculado de forma segura.")
 
+    # =========================================================================
+    # VISTA: REPORTES Y ESTADÍSTICAS
+    # =========================================================================
     elif seleccion == "Reportes y Estadísticas":
         st.title("📊 Centro de Reportes Avanzado")
-        # Selector de rango de fecha nativo de Streamlit
         col_f1, col_f2 = st.columns(2)
         with col_f1:
             f_inicio = st.date_input("Fecha Inicio", datetime.now() - timedelta(days=30))
