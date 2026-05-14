@@ -114,29 +114,41 @@ else:
         st.plotly_chart(fig, use_container_width=True)
 
     elif seleccion == "Inventario Multitienda":
-        st.title("📦 Matriz de Inventario Consolidado")
-        st.write("Vista completa de existencias cruzada con el análisis de 3 meses de Acarigua.")
+        st.title("📦 Matriz de Inventario Consolidado Multitienda")
+        st.markdown("---")
         
-        # Aquí conectamos la función del motor core que lee de la BD
-        # df_inventario = obtener_matriz_inventario_completo(DB_CONFIG)
-        # Muestra temporal simulando tu pantalla web real:
-        df_muestra = pd.DataFrame({
-            'CODIGO': ['00009', '034264025677', '00125'],
-            'DESCRIPCION': ['CUCHILLA LIC. OSTER', 'RELOJ LAVADORA', 'AUTOMATICO NEVERA'],
-            'COSTO': [4.50, 12.00, 8.50],
-            'ACARIGUA': [150, 42, 0],
-            'VALERA': [30, 15, 10],
-            'GUANARE': [65, 0, 5],
-            '3MESES': [120, 50, 15]
-        })
-        
-        # Buscador dinámico integrado (Sustituye al JS de tienda.php)
-        busqueda = st.text_input("Filtrar repuesto por nombre o código:")
-        if busqueda:
-            df_muestra = df_muestra[df_muestra['DESCRIPCION'].str.contains(busqueda, case=False) | df_muestra['CODIGO'].str.contains(busqueda)]
-            
-        st.dataframe(df_muestra, use_container_width=True)
+        # Llamamos al motor core de datos de manera real pasándole tus credenciales
+        with st.spinner("Cargando y consolidando existencias de todas las sucursales..."):
+            try:
+                from inventario_core import obtener_matriz_inventario_completo
+                df_inventario = obtener_matriz_inventario_completo(DB_CONFIG)
+            except Exception as e:
+                st.error(f"Error al conectar u obtener los datos del core: {e}")
+                df_inventario = pd.DataFrame()
 
+        if df_inventario.empty:
+            st.warning("No se encontraron registros de productos o inventario en la base de datos.")
+        else:
+            # Filtros interactivos superiores en pantalla
+            col_b1, col_b2 = st.columns([3, 1])
+            with col_b1:
+                # Buscador dinámico inteligente (Sustituye todo el JavaScript de la web vieja)
+                busqueda = st.text_input("🔍 Buscar repuesto por Nombre de Artículo o por Código Interno:")
+            with col_b2:
+                # Selector de registros por página
+                lineas_ver = st.selectbox("Mostrar filas:", [100, 200, 500, 1000], index=1)
+            
+            # Aplicar filtro en memoria si el usuario escribe
+            if busqueda:
+                df_inventario = df_inventario[
+                    df_inventario['DESCRIPCION'].str.contains(busqueda, case=False) | 
+                    df_inventario['CODIGO'].str.contains(busqueda)
+                ]
+            
+            st.info(f"Mostrando {min(len(df_inventario), lineas_ver)} de {len(df_inventario)} repuestos totales encontrados.")
+            
+            # Renderizar la tabla interactiva Pro nativa de Streamlit con ordenamiento automático
+            st.dataframe(df_inventario.head(lineas_ver), use_container_width=True, height=600)
     elif seleccion == "Cargar Reporte Ventas (Profit)":
         st.title("📥 Importación de Ventas desde Profit Plus")
         # Aquí mapeamos el formulario viejo de 'importar_ventas.php'
